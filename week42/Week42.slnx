@@ -1,0 +1,4 @@
+<Solution>
+  <Project Path="BlazorPlayGround/BlazorPlayGround.csproj" />
+  <Project Path="FirstBlazorWebApp/FirstBlazorWebApp.csproj" />
+</Solution>

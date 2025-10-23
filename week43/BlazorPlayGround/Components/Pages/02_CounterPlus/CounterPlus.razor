@@ -1,0 +1,83 @@
+﻿@page "/02/CounterPlus"
+@rendermode InteractiveServer
+
+<h3>CounterPlus</h3>
+
+<div class="row gy-3">
+    <!--  -->
+    <div class="col-md-6">
+        <div class="card">
+            <div class="card-header">One-way binding</div>
+            <div class="card-body">
+                <p class="text-muted">Viser verdien av <code>Count</code>. Kan ikke redigeres </p>
+                <label for="countDisplay" class="form-label">Nåværende verdi</label>
+                <input id="countDisplay" class="form-control" value="@Count" readonly/>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Two-way binding -->
+    <div class="col-md-6">
+        <div class="card">
+            <div class="card-header">Two-way binding</div>
+            <div class="card-body">
+                <p class="text-muted">Endring i input oppdaterer <code>Count</code> direkte</p>
+                <label for="countEdit" class="form-label">Rediger Count</label>
+                <InputNumber id="countEdit" @bind-Value="Count" class="form-control"/>
+                <small class="text-muted">Prøv å endre tallet her</small>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Step-kontroll -->
+    <div class="col-md-6">
+        <div class="card">
+            <div class="card-header">Step</div>
+            <div class="card-body">
+                <p class="text-muted">Bestem hvor mye knappen skal øke/minske med</p>
+                <div class="input-group">
+                    <span class="input-group-text">Step</span>
+                    <InputNumber id="stepInput" @bind-Value="Step" class="form-control"/>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Event Handling -->
+    <div class="col-md-6">
+        <div class="card">
+            <div class="card-header">Event Handling</div>
+            <div class="card-body d-flex gap-2 flex-wrap">
+                <!-- Peker direkte på metode-->
+                <button class="btn btn-primary" @onclick="Increment"> + @Step</button>
+                
+                <!-- Lambda -->
+                <button class="btn btn-outline-primary" @onclick="() => Count += Step"> + (Lambda)</button>
+                
+                <button class="btn btn-danger" @onclick="Decrement">- @Step</button>
+                
+                <!-- Lambda -->
+                <button class="btn btn-outline-danger" @onclick="() => Count -= Step"> + (Lambda)</button>
+                
+                <button class="btn btn-dark ms-auto"  @onclick="Reset">Reset</button>
+                
+            </div>
+        </div>
+    </div>
+    
+</div>
+
+@code {
+    private int Count { get; set; }
+    private int Step { get; set; } = 1;
+
+    private void Increment() => Count += Step;
+    private void Decrement() => Count -= Step;
+
+    private void Reset()
+    {
+        Count = 0;
+        Step = 1;
+    }
+
+}

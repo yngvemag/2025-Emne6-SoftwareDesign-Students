@@ -1,0 +1,9 @@
+﻿
+<p class="alert alert-info mb-0">
+    @Greeting, <strong>@Target</strong>
+</p>
+
+@code {
+    [Parameter] public string Greeting { get; set; } = "Hei";
+    [Parameter] public string Target { get; set; } = "Verden";
+}

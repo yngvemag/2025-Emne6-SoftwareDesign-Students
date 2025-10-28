@@ -1,0 +1,90 @@
+﻿@page "/users"
+@using StudentBloggClient.Models.Users
+@using StudentBloggClient.Services.Api
+
+@inject IUsersApiClient Api
+
+<h3 class="mb-3">Users</h3>
+
+@if (_isLoading)
+{
+    <div class="alert alert-info">Loading ...</div>
+}
+else if (_error is not null)
+{
+    <div class="alert alert-danger">@_error</div>
+}
+else if (_users.Count == 0)
+{
+    <div class="alert alert-warning">No users found.</div>
+}
+else
+{
+    <div class="table-responsive">
+        <table class="table table-striped">
+            <thead>
+                <tr>
+                    <th>Id</th>
+                    <th>UserName</th>
+                    <th>Name</th>
+                    <th>Email</th>
+                    <th></th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var u in _users)
+                {
+                    <tr>
+                        <td class="text-truncate">@u.Id</td>
+                        <td>@u.UserName</td>
+                        <td>@($"{u.FirstName} {u.LastName}")</td>
+                        <td>@u.Email</td>
+                        <td class="text-end">
+                            <a class="btn btn-sm btn-outline-primary" href="/users/@u.Id">View/Edit</a>
+                            <button class="btn btn-sm btn-outline-secondary ms-2" @onclick="() => DeleteById(u.Id)">Delete</button>
+                        </td>
+                        
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+}
+
+@code {
+
+    private List<UserDto> _users = [];
+    private bool _isLoading;
+    private string? _error;
+    private int _pageNumber = 1;
+    private int _pageSize = 10;
+
+    protected override async Task OnInitializedAsync()
+    {
+        await Load();
+    }
+
+    
+    private async Task Load()
+    {
+        _isLoading = true;
+        try
+        {
+            _users = (await Api.GetUsersAsync(_pageNumber, _pageSize)).ToList();
+        }
+        catch (Exception ex)
+        {
+            _error = ex.Message;
+        }
+        finally
+        {
+            _isLoading = false;
+        }
+    }
+
+    private async Task DeleteById(Guid id)
+    {
+        await Task.Delay(10);
+    }
+
+}

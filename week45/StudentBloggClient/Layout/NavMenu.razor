@@ -1,0 +1,77 @@
+﻿@using StudentBloggClient.Services.Auth
+@inject IBasicAuthStore AuthStore
+@inject NavigationManager NavManager
+
+<div class="top-row ps-3 navbar navbar-dark">
+    <div class="container-fluid">
+        <a class="navbar-brand" href="">StudentBloggClient</a>
+        <button title="Navigation menu" class="navbar-toggler" @onclick="ToggleNavMenu">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+    </div>
+</div>
+
+<div class="@NavMenuCssClass nav-scrollable" @onclick="ToggleNavMenu">
+    <nav class="nav flex-column">
+        <div class="nav-item px-3">
+            <NavLink class="nav-link" href="" Match="NavLinkMatch.All">
+                <span class="bi bi-house-door-fill-nav-menu" aria-hidden="true"></span> Home
+            </NavLink>
+        </div>
+        
+        <div class="nav-item px-3">
+            <NavLink class="nav-link" href="users" Match="NavLinkMatch.All">
+                <span class="bi bi-house-door-fill-nav-menu" aria-hidden="true"></span> Users
+            </NavLink>
+        </div>
+        
+        <div class="nav-item px-3">
+            @if (AuthStore.IsAuthenticated)
+            {
+                <div class="d-flex align-items-center justify-content-between">
+                    <span class="text-light">@AuthStore.UserName</span>
+                    <button class="btn btn-sm btn-outline-warning ms-2" @onclick="Logout">Logout</button>
+                </div>
+            }
+            else
+            {
+                <NavLink class="nav-link" href="login" Match="NavLinkMatch.All">
+                    <span class="bi bi-house-door-fill-nav-menu" aria-hidden="true"></span>🗝️ Login
+                </NavLink>    
+            }
+            
+        </div>
+    </nav>
+</div>
+
+@code {
+    private bool collapseNavMenu = true;
+
+    private string? NavMenuCssClass => collapseNavMenu ? "collapse" : null;
+
+    protected override void OnInitialized()
+    {
+        AuthStore.Changed += AuthStoreOnChanged;
+    }
+    
+    private void ToggleNavMenu()
+    {
+        collapseNavMenu = !collapseNavMenu;
+    }
+
+    private void AuthStoreOnChanged()
+    {
+        InvokeAsync(StateHasChanged);
+    }
+
+    public void Dispose()
+    {
+        AuthStore.Changed -= AuthStoreOnChanged;
+    }
+
+    private async Task Logout()
+    {
+        await AuthStore.ClearAsync();
+        NavManager.NavigateTo("Login");
+    }
+}

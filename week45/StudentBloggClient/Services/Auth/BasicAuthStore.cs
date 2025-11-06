@@ -38,9 +38,10 @@ public class BasicAuthStore(IJSRuntime js)  : IBasicAuthStore
         {
             var payload = JsonSerializer.Serialize(new PersistedAuth
             {
-                UserName = username,
-                Password = password
-            });
+                 UserName = username,
+                 Password = password,
+                 Base64Encoded = _authParam
+             });
             await _js.InvokeVoidAsync("sessionStorage.setItem", StorageKey, payload);
         }
         else
@@ -61,19 +62,22 @@ public class BasicAuthStore(IJSRuntime js)  : IBasicAuthStore
         Changed?.Invoke();
     }
 
-    private async Task LoadAsync()
+    public async Task LoadAsync()
     {
         try
         {
-            var json = await _js.InvokeAsync<string>("sessionStorage.getItem", StorageKey);
+            string json = await _js.InvokeAsync<string>("sessionStorage.getItem", StorageKey);            
             var persistedAuth = JsonSerializer.Deserialize<PersistedAuth>(json);
-            _username = persistedAuth?.UserName;
-            _authParam = persistedAuth?.Password;
+            _username = persistedAuth?.UserName;            
+            //var rawData = Encoding.UTF8.GetBytes($"{_username}:{persistedAuth?.Password}");
+            _authParam =  persistedAuth?.Base64Encoded;//  Convert.ToBase64String(rawData);
         }
-        catch (Exception ex) {}
+        catch (Exception) {}
         finally
         {
             _loaded = true;
+            // Notify listeners (e.g., NavMenu) that auth state may have changed after a full refresh
+            Changed?.Invoke();
         }
     }
   
@@ -81,5 +85,6 @@ public class BasicAuthStore(IJSRuntime js)  : IBasicAuthStore
     {
         public string? UserName { get; set; }
         public string? Password { get; set; }
+        public string? Base64Encoded {get; set;}
     }
 }

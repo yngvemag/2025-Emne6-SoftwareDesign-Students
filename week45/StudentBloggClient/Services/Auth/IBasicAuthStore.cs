@@ -11,5 +11,7 @@ public interface IBasicAuthStore
     
     Task ClearAsync(CancellationToken ct = default);
 
+    Task LoadAsync();
+
     event Action? Changed;
 }

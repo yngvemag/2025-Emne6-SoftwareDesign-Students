@@ -1,0 +1,48 @@
+﻿<h3>Rating</h3>
+
+<div class="border rounded p-2">
+    <div class="d-flex align-items-center gap-2">
+        <!-- Rating Stars-->
+        <div>
+            @for (int i = 1; i <= 5; i++)
+            {
+                int starNumber = i;
+                <button class="btn btn-outline-primary 
+                    @(starNumber <= Value ? "btn-secondary" : "btn-outline-secondary")"
+                        @onclick="() => OnStarClick(starNumber)">
+                    ⭐
+                </button>
+            }
+            
+        </div>
+        <!-- Current Value Display -->
+        <span class="text-muted small">(@Value/5)</span>
+        
+        <!-- Delete Button -->
+        <button class="btn btn-sm btn-outline-danger" @onclick="OnDeleteClick">
+            🗑️
+        </button>
+    </div>
+</div>
+
+@code 
+{
+    [Parameter, EditorRequired] public int Value { get; set; }
+    [Parameter, EditorRequired] public EventCallback<int> ValueChanged { get; set; }
+    
+    [Parameter] public EventCallback OnDelete { get; set; }
+
+    [Parameter, EditorRequired] public string ProductName { get; set; } = string.Empty;
+
+    private async Task OnStarClick(int rating)
+    {
+        // call parent via EventCallBack
+        await ValueChanged.InvokeAsync(rating);
+    }
+
+    private async Task OnDeleteClick()
+    {
+        // call parent
+        await OnDelete.InvokeAsync();
+    }
+}

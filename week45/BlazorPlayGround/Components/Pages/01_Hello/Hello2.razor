@@ -1,0 +1,48 @@
+﻿@page "/01/Hello2"
+@rendermode InteractiveServer
+@using Microsoft.AspNetCore.Components.Forms
+<h3>Hello2</h3>
+
+<div class="mb-3">
+    <label for="nameInput" class="form-label">Navn: </label>
+    <!--InputText id="nameInput" class="form-control" placeholder="Skriv inn navn ..."
+               @bind-Value="_inputName" @bind-Value:event="oninput"/-->
+    <input type="text" id="nameInput" class="form-control" placeholder="Skriv inn navn ..."
+           @oninput="OnNameChanged"/>
+</div>
+
+<div class="mb-3">
+    <label for="nickInput" class="form-label">Nickname ...</label>
+    <input type="text" id="nickInput" class="form-control" @oninput="OnNickChanged" placeholder="Skriv inn nickname ..."/>
+</div>
+
+
+<Greeter Greeting="@Greeting" Target="@DisplayName"/>
+
+@code {
+    
+    private string _inputName = string.Empty;
+    private string _nickName = string.Empty;
+    private string _name = string.Empty;
+    
+    [Parameter, SupplyParameterFromQuery(Name="greeting")] public string? GreetingFromQuery { get; set; }
+    [Parameter, SupplyParameterFromQuery(Name="nickname")] public string? NickNameFromQuery { get; set; }
+    [Parameter, SupplyParameterFromQuery(Name="name")] public string? NameFromQuery { get; set; }
+
+    public string Greeting { get; } = "Hello";
+
+    public string DisplayName => $"{_inputName ?? "NoName"} ({_nickName ?? "ingen kallenavn?"})";
+
+    private async Task OnNameChanged(ChangeEventArgs e)
+    {
+        _inputName = e.Value?.ToString() ?? "";
+        await InvokeAsync(StateHasChanged);
+    }
+
+    private async Task OnNickChanged(ChangeEventArgs e)
+    {
+        _nickName = e.Value?.ToString() ?? "";
+        await InvokeAsync(StateHasChanged); 
+    }
+
+}

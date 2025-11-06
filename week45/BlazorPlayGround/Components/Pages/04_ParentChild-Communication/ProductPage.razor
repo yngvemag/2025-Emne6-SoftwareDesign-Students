@@ -1,0 +1,134 @@
+﻿@page "/04/Product"
+@rendermode InteractiveServer
+
+<h3>ProductRating</h3>
+
+<!-- Current State -->
+<div class="alert alert-info">
+    <h5> Status </h5>
+    <p><strong>Antall produkter:</strong> @_products.Count </p>
+</div>
+
+<!-- Add new product -->
+<div class="card mb-3">
+    <div class="card-header">➕ Legg til nytt produkt</div>
+    <div class="card-body">
+        <input type="text" class="form-control mb-2" @bind="_newProductName" />
+        <button class="btn btn-success" @onclick="AddProduct">Legg til</button>
+    </div>
+</div>
+
+
+<!-- Product List -->
+<h4> Produktliste </h4>
+@if (!_products.Any())
+{
+    <div class="alert alert-warning">Ingen produkter lagt til</div>    
+}
+else
+{
+    @foreach (var product in _products)
+    {
+        <div class="card mb-2">
+            <div class="card-body">
+                <div class="row align-items-center">
+                    <div class="col-md-2">
+                        <h6>@product.Name</h6>
+                    </div>
+                    
+                    <div class="col-md-8">
+                        <Rating Value="@product.Rating"
+                                ValueChanged="@(value => UpdateRating(product, value))"
+                                ProductName="@product.Name"
+                                OnDelete="@(() => DeleteProduct(product))"
+                                />
+                    </div>
+                    
+                    <div class="col-md-2">
+                        <span class="bg-secondary-subtle">@product.Rating ⭐</span>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    }   
+}
+
+<!-- Event Log -->
+<div class="card mt-4">
+    <div class="card-header"> Event Log </div>
+    <div class="card-body">
+        @if (!_eventLog.Any())
+        {
+            <div class="text-muted">Ingen events ennå ...</div>
+        }
+        else
+        {
+            @foreach(string logEntry in _eventLog.TakeLast(5))
+            {
+                <div class="small text-muted">@logEntry</div>
+            }
+        }
+    </div>
+</div>
+
+@code {
+    private List<Product> _products = [];
+    private string _newProductName = string.Empty;
+
+    private List<string> _eventLog = [];
+
+    protected override void OnInitialized()
+    {
+        // _products.AddRange([
+        //     new Product() {Id=1, Name = "Laptop", Rating = 3},
+        //     new Product() {Id=2, Name = "Skjerm", Rating = 2},
+        //     new Product() {Id=3, Name = "Tastatur", Rating = 4}
+        // ]);
+    }
+
+    // EventCallBack
+    private void UpdateRating(Product product, int newRating)
+    {
+        var oldRating = product.Rating;
+        product.Rating = newRating;
+        
+        LogEvent($"Updated {product.Name} rating from {oldRating} to {newRating}");
+    }
+
+    private void AddProduct()
+    {
+        if (!string.IsNullOrWhiteSpace(_newProductName))
+        {
+            var newProduct = new Product
+            {
+                Id = _products.Any() ? _products.Max(p=>p.Id +1) : 1,
+                Name = _newProductName,
+                Rating = 1
+            };
+            
+            _products.Add(newProduct);
+            
+            LogEvent($"Added new product: {_newProductName}");
+            _newProductName = string.Empty;
+        }
+    }
+
+    private void DeleteProduct(Product product)
+    {
+        _products.Remove(product);
+        LogEvent($"Deleted product: {product.Name}");
+    }
+    public class Product
+    {
+        public int Id { get; set; }
+        public string Name { get; set; }
+        public int Rating { get; set; }
+    }
+
+    private void LogEvent(string message)
+    {
+        _eventLog.Add($"{DateTime.UtcNow:HH:mm:ss} - {message}");
+    }
+
+}

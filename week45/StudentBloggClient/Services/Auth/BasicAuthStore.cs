@@ -42,11 +42,11 @@ public class BasicAuthStore(IJSRuntime js)  : IBasicAuthStore
                  Password = password,
                  Base64Encoded = _authParam
              });
-            await _js.InvokeVoidAsync("sessionStorage.setItem", StorageKey, payload);
+            await _js.InvokeVoidAsync("sessionStorage.setItem", ct, StorageKey, payload);
         }
         else
         {
-            await _js.InvokeVoidAsync("sessionStorage.removeItem", StorageKey);
+            await _js.InvokeVoidAsync("sessionStorage.removeItem", ct, StorageKey);
         }
 
         _loaded = true;
@@ -58,7 +58,7 @@ public class BasicAuthStore(IJSRuntime js)  : IBasicAuthStore
         _username = null;
         _authParam = null;
         _loaded = false;
-        await _js.InvokeVoidAsync("sessionStorage.removeItem", StorageKey);
+        await _js.InvokeVoidAsync("sessionStorage.removeItem", ct, StorageKey);
         Changed?.Invoke();
     }
 

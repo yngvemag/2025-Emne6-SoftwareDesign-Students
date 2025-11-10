@@ -1,0 +1,67 @@
+﻿@page "/Login"
+@using StudentBloggClient.Services.Auth
+
+@inject IBasicAuthStore AuthStore
+@inject NavigationManager NavManager
+
+<h3>Login</h3>
+
+<EditForm Model="_model" OnValidSubmit="HandleLoginAsync">
+    <DataAnnotationsValidator/>
+    <ValidationSummary/>
+    
+    <div class="row g-3">
+        <div class="col-md-12">
+            <label class="form-label" for="username">Username</label>
+            <InputText id="username" class="form-control" @bind-Value="_model.UserName"/>
+        </div>
+        
+        <div class="col-md-12">
+            <label class="form-label" for="password">Password</label>
+            <InputText id="password" type="password" class="form-control" @bind-Value="_model.Password"/>
+        </div>
+        <div class="col-12">
+            <div class="form-check">
+                <InputCheckbox id="remember" class="form-check-input" @bind-Value="_model.RememberMe" />
+                <label class="form-check-label" for="remember">Remember this tab (session storage)</label>
+            </div>
+        </div>
+    </div> 
+    
+    <div class="mt-3 d-flex gap-2">
+        <button class="btn btn-primary" type="submit">Login</button>
+    </div>
+    
+</EditForm>
+
+@if (!string.IsNullOrEmpty(_error))
+{
+    <div class="alert alert-danger mt-3">@_error</div>
+}
+
+@code {
+    private readonly LoginModel _model = new LoginModel();
+    private string? _error;
+
+    private async Task HandleLoginAsync()
+    {
+        try
+        {
+            await AuthStore.SetAsync(_model.UserName!, _model.Password!, _model.RememberMe);
+            // Navigere til users !!
+            NavManager.NavigateTo("/users");
+        }
+        catch (Exception e)
+        {
+            _error = e.Message;
+            Console.WriteLine(e.Message);
+        }
+    }
+
+    private sealed class LoginModel
+    {
+        public string? UserName { get; set; }
+        public string? Password { get; set; }
+        public bool RememberMe { get; set; } = true;
+    }
+}

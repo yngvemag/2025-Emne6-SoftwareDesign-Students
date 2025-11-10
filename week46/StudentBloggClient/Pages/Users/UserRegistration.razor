@@ -1,0 +1,82 @@
+﻿@page "/users/register"
+
+@using StudentBloggClient.Models.Users
+
+@inject StudentBloggClient.Services.Api.IUsersApiClient Api
+@inject NavigationManager Nav
+
+<h3>UserRegistration</h3>
+
+<h3 class="mb-3">Register user</h3>
+
+<EditForm Model="_model" OnValidSubmit="Register">
+    <DataAnnotationsValidator />
+    <ValidationSummary />
+    <div class="row g-3">
+        <div class="col-md-12">
+            <label class="form-label">UserName</label>
+            <InputText class="form-control" @bind-Value="_model.UserName" />
+        </div>
+        <div class="col-md-12">
+            <label class="form-label">First name</label>
+            <InputText class="form-control" @bind-Value="_model.FirstName" />
+        </div>
+        <div class="col-md-12">
+            <label class="form-label">Last name</label>
+            <InputText class="form-control" @bind-Value="_model.LastName" />
+        </div>
+        <div class="col-md-12">
+            <label class="form-label">Email</label>
+            <InputText class="form-control" @bind-Value="_model.Email" />
+        </div>
+        <div class="col-md-12">
+            <label class="form-label">Password</label>
+            <InputText type="password" class="form-control" @bind-Value="_model.Password" />
+        </div>
+    </div>
+    <div class="mt-3 d-flex gap-2">
+        <button class="btn btn-success" type="submit" disabled="@_isSubmitting">
+            @if (_isSubmitting)
+            {
+                <span class="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>
+            }
+            Register
+        </button>
+        <a class="btn btn-outline-secondary" href="/users">Cancel</a>
+    </div>
+</EditForm>
+
+@if (_error is not null)
+{
+    <div class="alert alert-danger mt-3">@_error</div>
+}
+
+@code {
+    private readonly UserRegistrationDto _model = new();
+    private string? _error;
+    private bool _isSubmitting;
+
+    private async Task Register()
+    {
+        _error = null;
+        _isSubmitting = true;
+        try
+        {
+            var created = await Api.RegisterUserAsync(_model);
+            if (created is null)
+            {
+                _error = "Failed to register user.";
+                return;
+            }
+            Nav.NavigateTo($"/users/{created.Id}");
+        }
+        catch (Exception ex)
+        {
+            _error = ex.Message;
+        }
+        finally
+        {
+            _isSubmitting = false;
+        }
+    }
+}

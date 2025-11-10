@@ -1,0 +1,151 @@
+﻿@page "/users"
+@using StudentBloggClient.Models.Users
+@using StudentBloggClient.Services.Api
+@using StudentBloggClient.Services.Auth
+
+@inject IUsersApiClient Api
+@inject IBasicAuthStore Auth
+
+<h3 class="mb-3">Users</h3>
+
+@if (_authState.IsChecked)
+{
+    @if (_authState.IsAuthed)
+    {
+        <div class="alert alert-success py-2">
+            Auth state: @($"logged in as {_authState.UserName}")
+        </div>    
+    }
+    else
+    {
+        <div class="alert alert-warning py-2">
+            Auth state: not logged in
+        </div>
+    }
+}
+
+// Pagination controls
+<div class="d-flex align-items-end gap-2 mb-3">
+    <div>
+        <label class="form-label">Page</label>
+        <input type="number" class="form-control" @bind="_pageNumber" @bind:event="oninput" min="1" />
+    </div>
+    <div>
+        <label class="form-label">Page Size</label>
+        <input type="number" class="form-control" @bind="_pageSize" @bind:event="oninput" min="1" />
+    </div>
+    <button class="btn btn-primary" @onclick="ReLoad">Reload</button>
+    <a class="btn btn-success" href="/users/register">Register New</a>
+</div>
+
+@if (_isLoading)
+{
+    <div class="alert alert-info">Loading ...</div>
+}
+else if (_error is not null)
+{
+    <div class="alert alert-danger">@_error</div>
+}
+else if (_users.Count == 0)
+{
+    <div class="alert alert-warning">No users found.</div>
+}
+else
+{
+    <div class="table-responsive">
+        <table class="table table-striped">
+            <thead>
+                <tr>
+                    <th>Id</th>
+                    <th>UserName</th>
+                    <th>Name</th>
+                    <th>Email</th>
+                    <th></th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var u in _users)
+                {
+                    <tr>
+                        <td class="text-truncate">@u.Id</td>
+                        <td>@u.UserName</td>
+                        <td>@($"{u.FirstName} {u.LastName}")</td>
+                        <td>@u.Email</td>
+                        <td class="text-end">
+                            <a class="btn btn-sm btn-outline-primary" href="/users/@u.Id">View/Edit</a>
+                            <button class="btn btn-sm btn-outline-secondary ms-2" @onclick="() => DeleteById(u.Id)">Delete</button>
+                        </td>
+                        
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+}
+
+@code {
+
+    private List<UserDto> _users = [];
+    private bool _isLoading;
+    private string? _error;
+    private int _pageNumber = 1;
+    private int _pageSize = 10;
+    private readonly AuthState _authState = new();
+
+    protected override async Task OnInitializedAsync()
+    {
+        await Load();
+        SetAuthState();
+    }
+
+    private async Task Load()
+    {
+        _isLoading = true;
+        try
+        {
+            _users = (await Api.GetUsersAsync(_pageNumber, _pageSize)).ToList();
+        }
+        catch (Exception)
+        {
+            //_error = ex.StackTrace;
+            _error = "No users found or you are not authorized to view the users.";
+        }
+        finally
+        {
+            _isLoading = false;
+        }
+    }
+
+    private async Task DeleteById(Guid id)
+    {
+        var userToDelete = _users.FirstOrDefault(x => x.Id == id);
+
+        if (await Api.DeleteUserAsync(id) is null)
+        {
+            _error = $"Failed to delete user with id {id}";
+        }
+
+        await Load();
+    }
+
+    private void SetAuthState()
+    {
+        _authState.UserName = Auth.UserName;
+        _authState.IsAuthed = !string.IsNullOrEmpty(Auth.UserName);
+        _authState.IsChecked = true;
+    }
+
+    private class AuthState
+    {
+        public bool IsAuthed { get; set; }
+        public bool IsChecked { get; set; }
+        public string? UserName { get; set; }
+    }
+
+    private async Task ReLoad()
+    {
+        _error = null;
+        await Load();
+    }
+
+}

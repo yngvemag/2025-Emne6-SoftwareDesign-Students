@@ -1,0 +1,34 @@
+﻿@page "/07/CascadingParametersDemo"
+
+@rendermode InteractiveServer
+
+<div class="container">
+    <h1>Cascading Parameters Demo</h1>
+    
+    <div class="row mb-3">
+        <div class="col-md-6">
+            <label for="theme-select" class="form-label">Select Theme:</label>
+            <select id="theme-select" class="form-select" @onchange="OnThemeChanged">
+                <option value="light">Light</option>
+                <option value="dark">Dark</option>
+            </select>    
+        </div>
+        
+        <div class="col-md-6">
+            <label for="text-size-select" class="form-label">Select Text Size:</label>
+            <select id="text-size-select" class="form-select" @onchange="OnTextSizeChanged">
+                <option value="small">Small</option>
+                <option value="medium">Medium</option>
+                <option value="large">Large</option>
+            </select>    
+        </div>
+        
+        <CascadingValue Value="CascadingStateValue">
+            <div class="p-4 border rounded @(CascadingStateValue.Theme == "dark" ? "bg-dark text-white" : "bg-light text-dark") ">
+                <h3 class="mb-3">Parent Component</h3>
+                <Level1Component/>
+            </div>
+        </CascadingValue>
+        
+    </div>
+</div>

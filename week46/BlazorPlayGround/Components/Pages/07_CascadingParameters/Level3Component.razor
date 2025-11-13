@@ -1,0 +1,15 @@
+﻿
+<div class="p-4 border rounded mt-3 @(CascadingStateValue?.Theme == "dark" ? "bg-warning bg-opacity-75 text-white" 
+                                        : "bg-danger-subtle text-dark") ">
+
+    <h6 class="mb-3">Level 3 Component</h6>
+    <p>This component also receives the cascaded value</p>
+    <div class="alert @(CascadingStateValue?.Theme == "dark" ? "alert-dark" : "alert-primary")">
+        Theme: <strong>@CascadingStateValue?.Theme</strong>
+    </div>
+    
+</div>
+
+@code {
+    [CascadingParameter] private CascadingParametersDemo.CascadingState? CascadingStateValue { get; set; }
+}
